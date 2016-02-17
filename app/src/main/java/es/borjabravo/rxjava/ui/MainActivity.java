@@ -95,4 +95,9 @@ public class MainActivity extends BaseActivity implements MoviesView {
     public void onCompletedLoadUsers() {
         Log.i(TAG, "Completed");
     }
+
+    @Override
+    public void onError() {
+        Log.e(TAG, "Error");
+    }
 }

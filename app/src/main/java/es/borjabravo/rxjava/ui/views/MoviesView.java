@@ -10,6 +10,6 @@ import es.borjabravo.rxjava.io.models.Movie;
 public interface MoviesView {
     void updateMoviesFound(ArrayList<Movie> movies);
     void updateMovieFound(Movie movie);
-
     void onCompletedLoadUsers();
+    void onError();
 }

@@ -29,24 +29,9 @@ public class MoviesInteractor {
         api.getMoviesFromSearch()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<MoviesResponse>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.i(TAG, "Completed");
-                        callback.onCompleted();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "Error: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(MoviesResponse moviesResponse) {
-                        Log.i(TAG, "Movies found: " + moviesResponse.getMovies().size());
-                        callback.onMoviesFound(moviesResponse.getMovies());
-                    }
-                });
+                .subscribe(moviesResponse -> callback.onMoviesFound(moviesResponse.getMovies()),
+                        error -> Log.e(TAG, error.getMessage()),
+                        callback::onCompleted);
     }
 
     //Simple request - All movies from organization choosen - Filtered by only movies
@@ -54,74 +39,22 @@ public class MoviesInteractor {
         api.getMoviesFromSearch()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(new Func1<MoviesResponse, Observable<Movie>>() {
-                    @Override
-                    public Observable<Movie> call(MoviesResponse moviesResponse) {
-                        Log.i(TAG, "Movies found: " + moviesResponse.getMovies().size());
-                        return Observable.from(moviesResponse.getMovies());
-                    }
-                })
-                .filter(new Func1<Movie, Boolean>() {
-                    @Override
-                    public Boolean call(Movie movie) {
-                        return movie.getType().equalsIgnoreCase("movie");
-                    }
-                })
-                .subscribe(new Observer<Movie>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.i(TAG, "Completed");
-                        callback.onCompleted();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "Error: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(Movie movie) {
-                        Log.i(TAG, "Movie found: " + movie.getTitle());
-                        callback.onMovieFound(movie);
-                    }
-                });
+                .flatMap(moviesResponse -> Observable.from(moviesResponse.getMovies()))
+                .filter(movie -> movie.getType().equalsIgnoreCase("movie"))
+                .subscribe(callback::onMovieFound,
+                        error -> Log.e(TAG, error.getMessage()),
+                        callback::onCompleted);
     }
 
     //Nested request - Movie detail info
     public void getMovieInfo(final MoviesCallback callback) {
         api.getMoviesFromSearch()
-                .flatMap(new Func1<MoviesResponse, Observable<Movie>>() {
-                    @Override
-                    public Observable<Movie> call(MoviesResponse moviesResponse) {
-                        Log.i(TAG, "Movies found: " + moviesResponse.getMovies().size());
-                        return Observable.from(moviesResponse.getMovies());
-                    }
-                })
-                .flatMap(new Func1<Movie, Observable<Movie>>() {
-                    @Override
-                    public Observable<Movie> call(Movie movie) {
-                        return api.getMovieInfo(movie.getImdbID());
-                    }
-                })
+                .flatMap(moviesResponse -> Observable.from(moviesResponse.getMovies()))
+                .flatMap(movie -> api.getMovieInfo(movie.getImdbID()))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Movie>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.i(TAG, "Completed");
-                        callback.onCompleted();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "Error: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(Movie movie) {
-                        Log.i(TAG, "Movie found: " + movie.getTitle());
-                        callback.onMovieFound(movie);
-                    }
-                });
+                .subscribe(callback::onMovieFound,
+                        error -> Log.e(TAG, error.getMessage()),
+                        callback::onCompleted);
     }
 }
