@@ -49,6 +49,11 @@ public class MoviesPresenter extends BasePresenter implements MoviesCallback {
     }
 
     @Override
+    public void onError() {
+        moviesView.onError();
+    }
+
+    @Override
     public void onStart() {
 
     }

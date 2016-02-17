@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 
 import java.util.ArrayList;
 
@@ -94,5 +93,10 @@ public class MainActivity extends BaseActivity implements MoviesView {
     @Override
     public void onCompletedLoadUsers() {
         Log.i(TAG, "Completed");
+    }
+
+    @Override
+    public void onError() {
+        Log.e(TAG, "Error");
     }
 }
