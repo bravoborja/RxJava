@@ -1,16 +1,9 @@
 package es.borjabravo.rxjava.ui.interactors;
 
-import android.util.Log;
-
 import es.borjabravo.rxjava.Api;
 import es.borjabravo.rxjava.io.callbacks.MoviesCallback;
-import es.borjabravo.rxjava.io.models.Movie;
-import es.borjabravo.rxjava.io.responses.MoviesResponse;
 import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MoviesInteractor {
@@ -30,7 +23,7 @@ public class MoviesInteractor {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(moviesResponse -> callback.onMoviesFound(moviesResponse.getMovies()),
-                        error -> Log.e(TAG, error.getMessage()),
+                        error -> callback.onError(),
                         callback::onCompleted);
     }
 
@@ -42,7 +35,7 @@ public class MoviesInteractor {
                 .flatMap(moviesResponse -> Observable.from(moviesResponse.getMovies()))
                 .filter(movie -> movie.getType().equalsIgnoreCase("movie"))
                 .subscribe(callback::onMovieFound,
-                        error -> Log.e(TAG, error.getMessage()),
+                        error -> callback.onError(),
                         callback::onCompleted);
     }
 
@@ -54,7 +47,7 @@ public class MoviesInteractor {
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback::onMovieFound,
-                        error -> Log.e(TAG, error.getMessage()),
+                        error -> callback.onError(),
                         callback::onCompleted);
     }
 }
